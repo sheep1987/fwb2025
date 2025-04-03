@@ -1,0 +1,18 @@
+{
+  "name": "tinymce-mysql-project",
+  "version": "1.0.0",
+  "description": "使用 TinyMCE 的富文本编辑器，带 MySQL 保存功能",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.1",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+} 

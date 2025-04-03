@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TinyMCE 富文本编辑器</title>
+    <!-- 使用本地 TinyMCE -->
+    <script src="tinymce/js/tinymce/tinymce.min.js"></script>
+    <!-- 引入 CSS 文件 -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TinyMCE 富文本编辑器</h1>
+        
+        <div class="form-group">
+            <label for="title">标题：</label>
+            <input type="text" id="title" placeholder="请输入标题">
+        </div>
+        
+        <div class="form-group">
+            <label for="projectType">项目类型：</label>
+            <select id="projectType">
+                <option value="">-- 请选择项目类型 --</option>
+                <option value="智慧社区弱电+软件">智慧社区弱电+软件</option>
+                <option value="公路项目">公路项目</option>
+                <option value="桥梁项目">桥梁项目</option>
+                <option value="市政项目">市政项目</option>
+                <option value="土建项目">土建项目</option>
+                <option value="智能化项目">智能化项目</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="contentId">选择内容：</label>
+            <select id="contentId">
+                <option value="">-- 新建内容 --</option>
+                <!-- 已保存的内容将通过 JavaScript 动态添加 -->
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="editor">内容：</label>
+            <textarea id="editor"></textarea>
+        </div>
+        
+        <div class="btn-container">
+            <button id="saveButton">保存内容</button>
+            <button id="deleteButton" class="btn-delete" disabled>删除内容</button>
+            <button class="btn-history" onclick="window.location.href='history.html'">查看历史记录</button>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
+    
+    <!-- 删除确认对话框 -->
+    <div class="confirm-dialog" id="deleteConfirmDialog">
+        <div class="confirm-dialog-content">
+            <h3>确认删除</h3>
+            <p>您确定要删除这条内容吗？此操作不可恢复。</p>
+            <div class="confirm-dialog-buttons">
+                <button id="confirmDeleteButton" class="btn-delete">确认删除</button>
+                <button id="cancelDeleteButton">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let allContents = [];
+        let currentContentId = '';
+        
+        // 页面加载完成后获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化 TinyMCE
+            initTinyMCE();
+            
+            // 加载已保存的内容列表
+            loadContentList();
+            
+            // 设置下拉框变更事件
+            document.getElementById('contentId').addEventListener('change', function() {
+                const selectedId = this.value;
+                currentContentId = selectedId;
+                
+                if(selectedId) {
+                    // 加载选中的内容
+                    loadSelectedContent(selectedId);
+                    // 启用删除按钮
+                    document.getElementById('deleteButton').disabled = false;
+                } else {
+                    // 清空编辑器和表单
+                    clearForm();
+                    // 禁用删除按钮
+                    document.getElementById('deleteButton').disabled = true;
+                }
+            });
+            
+            // 设置删除按钮事件
+            setupDeleteButton();
+        });
+        
+        // 初始化 TinyMCE
+        function initTinyMCE() {
+            tinymce.init({
+                selector: '#editor',
+                height: 450,
+                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                language: 'zh_CN', // 中文界面
+                language_url: '/tinymce/langs/zh_CN.js', // 指定中文语言包路径
+                branding: false,    // 移除 TinyMCE 品牌
+                menubar: true,      // 显示菜单栏
+                statusbar: true,    // 显示状态栏
+                resize: true,       // 允许调整大小
+                skin: 'oxide',      // 使用默认皮肤
+            });
+        }
+        
+        // 加载内容列表
+        function loadContentList() {
+            fetch('/api/get-contents')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络请求失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        allContents = data.data;
+                        populateContentDropdown(data.data);
+                    } else {
+                        showMessage('获取内容列表失败: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('发生错误: ' + error.message, 'error');
+                });
+        }
+        
+        // 填充内容下拉框
+        function populateContentDropdown(contents) {
+            const dropdown = document.getElementById('contentId');
+            // 保留第一个选项
+            dropdown.innerHTML = '<option value="">-- 新建内容 --</option>';
+            
+            contents.forEach(content => {
+                const option = document.createElement('option');
+                option.value = content.id;
+                option.textContent = content.title + (content.category ? ` - ${content.category}` : '');
+                dropdown.appendChild(option);
+            });
+        }
+        
+        // 加载选中的内容
+        function loadSelectedContent(id) {
+            fetch(`/api/get-content/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络请求失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // 填充表单
+                        document.getElementById('title').value = data.data.title;
+                        
+                        // 如果有类别，则设置下拉框
+                        const categorySelect = document.getElementById('projectType');
+                        if (data.data.category) {
+                            for (let i = 0; i < categorySelect.options.length; i++) {
+                                if (categorySelect.options[i].value === data.data.category) {
+                                    categorySelect.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        } else {
+                            categorySelect.selectedIndex = 0;
+                        }
+                        
+                        // 设置编辑器内容
+                        tinymce.get('editor').setContent(data.data.content);
+                    } else {
+                        showMessage('获取内容失败: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('发生错误: ' + error.message, 'error');
+                });
+        }
+        
+        // 清空表单
+        function clearForm() {
+            document.getElementById('title').value = '';
+            document.getElementById('projectType').selectedIndex = 0;
+            tinymce.get('editor').setContent('');
+        }
+        
+        // 设置删除按钮
+        function setupDeleteButton() {
+            const deleteButton = document.getElementById('deleteButton');
+            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            const cancelDeleteButton = document.getElementById('cancelDeleteButton');
+            const deleteConfirmDialog = document.getElementById('deleteConfirmDialog');
+            
+            // 点击删除按钮
+            deleteButton.addEventListener('click', function() {
+                if (currentContentId) {
+                    deleteConfirmDialog.style.display = 'flex';
+                }
+            });
+            
+            // 点击确认删除按钮
+            confirmDeleteButton.addEventListener('click', function() {
+                deleteContent();
+            });
+            
+            // 点击取消删除按钮
+            cancelDeleteButton.addEventListener('click', function() {
+                deleteConfirmDialog.style.display = 'none';
+            });
+        }
+        
+        // 删除内容
+        function deleteContent() {
+            if (!currentContentId) {
+                showMessage('请先选择要删除的内容', 'error');
+                return;
+            }
+            
+            fetch('/api/delete-content/' + currentContentId, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 隐藏确认对话框
+                document.getElementById('deleteConfirmDialog').style.display = 'none';
+                
+                if (data.success) {
+                    showMessage('内容已成功删除！', 'success');
+                    
+                    // 重新加载内容列表
+                    loadContentList();
+                    
+                    // 清空表单
+                    clearForm();
+                    
+                    // 重置当前内容ID
+                    currentContentId = '';
+                    document.getElementById('contentId').selectedIndex = 0;
+                    
+                    // 禁用删除按钮
+                    document.getElementById('deleteButton').disabled = true;
+                } else {
+                    showMessage('删除失败：' + data.message, 'error');
+                }
+            })
+            .catch((error) => {
+                document.getElementById('deleteConfirmDialog').style.display = 'none';
+                showMessage('发生错误：' + error.message, 'error');
+            });
+        }
+
+        // 保存内容到数据库
+        document.getElementById('saveButton').addEventListener('click', function() {
+            const title = document.getElementById('title').value;
+            const projectType = document.getElementById('projectType').value;
+            const content = tinymce.get('editor').getContent();
+            
+            if (!title.trim()) {
+                showMessage('请输入标题', 'error');
+                return;
+            }
+            
+            if (!projectType) {
+                showMessage('请选择项目类型', 'error');
+                return;
+            }
+            
+            if (!content.trim()) {
+                showMessage('请输入内容', 'error');
+                return;
+            }
+            
+            // 判断是新建还是更新
+            if (currentContentId) {
+                // 更新现有内容
+                const data = {
+                    id: currentContentId,
+                    title: title,
+                    category: projectType,
+                    content: content
+                };
+                
+                fetch('/api/update-content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('内容已成功更新！', 'success');
+                        // 更新内容列表
+                        loadContentList();
+                    } else {
+                        showMessage('更新失败：' + data.message, 'error');
+                    }
+                })
+                .catch((error) => {
+                    showMessage('发生错误：' + error.message, 'error');
+                });
+            } else {
+                // 新建内容
+                fetch('/api/save-content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        projectType: projectType,
+                        content: content
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('内容已成功保存！', 'success');
+                        // 更新内容列表并选择新创建的内容
+                        loadContentList();
+                        // 设置新创建的内容ID
+                        setTimeout(() => {
+                            document.getElementById('contentId').value = data.id;
+                            currentContentId = data.id;
+                            document.getElementById('deleteButton').disabled = false;
+                        }, 500);
+                    } else {
+                        showMessage('保存失败：' + data.message, 'error');
+                    }
+                })
+                .catch((error) => {
+                    showMessage('发生错误：' + error.message, 'error');
+                });
+            }
+        });
+
+        // 显示消息
+        function showMessage(text, type) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = text;
+            messageElement.className = 'message ' + type;
+            messageElement.style.display = 'block';
+            
+            // 滚动到消息位置
+            messageElement.scrollIntoView({ behavior: 'smooth' });
+            
+            // 5秒后自动隐藏消息
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

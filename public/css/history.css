@@ -1,0 +1,360 @@
+.header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-add {
+    background-color: #2196F3;
+}
+
+.btn-add:hover {
+    background-color: #0b7dda;
+}
+
+.btn-export {
+    background-color: #FF9800;
+}
+
+.btn-export:hover {
+    background-color: #e68a00;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+.action-btn {
+    padding: 6px 10px;
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+.btn-view {
+    background-color: #2196F3;
+}
+
+.btn-view:hover {
+    background-color: #0b7dda;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+}
+
+.pagination .current {
+    background-color: #45a049;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.empty-state p {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.export-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    display: none;
+}
+
+.export-dialog {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+}
+
+.export-dialog p {
+    margin-bottom: 20px;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #4CAF50;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-container {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .action-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    input, select, button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    th, td {
+        padding: 8px 10px;
+    }
+    
+    .action-column {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        margin-bottom: 5px;
+        margin-right: 0;
+        text-align: center;
+    }
+}
+
+/* 表格工具栏 */
+.table-tools {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+
+/* 全选容器 */
+.select-all-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.select-all-container input {
+    margin-right: 5px;
+}
+
+/* 表格中的复选框 */
+.entry-checkbox {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+/* 为复选框单元格添加居中对齐 */
+td:first-child {
+    text-align: center;
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #d32f2f;
+}
+
+/* 确认对话框样式 */
+.confirm-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirm-dialog-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-dialog h3 {
+    margin-top: 0;
+    color: #d32f2f;
+    margin-bottom: 15px;
+}
+
+.confirm-dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.confirm-dialog-buttons button {
+    padding: 8px 15px;
+}
+
+/* 调整操作列按钮样式 */
+.action-column {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 4px 8px;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+/* 调整表格列宽度和内容显示 */
+table th:nth-child(4), /* 项目类型列 */
+table td:nth-child(4) {
+    width: 150px;
+    min-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 确保创建时间列不会换行 */
+table th:nth-child(5),
+table td:nth-child(5) {
+    width: 150px;
+    min-width: 150px;
+    white-space: nowrap;
+}
+
+/* 保证操作列的按钮水平排列 */
+table th:nth-child(6),
+table td:nth-child(6) {
+    width: 120px;
+    min-width: 120px;
+}
+
+/* 调整操作列中的按钮 */
+.action-column {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-start;
+    min-width: 120px;
+}
+
+/* 媒体查询适配小屏幕 */
+@media (max-width: 768px) {
+    /* 在小屏幕上，表格改为垂直布局 */
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    tr {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+    
+    td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        white-space: normal;
+        text-align: left;
+    }
+    
+    td:before {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+    }
+    
+    /* 为每个单元格添加标题 */
+    td:nth-of-type(1):before { content: "选择"; }
+    td:nth-of-type(2):before { content: "ID"; }
+    td:nth-of-type(3):before { content: "标题"; }
+    td:nth-of-type(4):before { content: "项目类型"; }
+    td:nth-of-type(5):before { content: "创建时间"; }
+    td:nth-of-type(6):before { content: "操作"; }
+    
+    /* 调整操作列按钮在手机上的布局 */
+    .action-column {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding-left: 50%;
+    }
+    
+    .action-btn {
+        margin-bottom: 0;
+        margin-right: 5px;
+    }
+} 
