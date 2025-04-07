@@ -2,10 +2,10 @@ const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { dbConfig } = require('./config'); // 导入数据库配置
+const { dbConfig, serverConfig } = require('./config'); // 修改这行，导入 serverConfig
 
 const app = express();
-const port = 3000;
+const port = serverConfig.port; // 修改这行，使用配置中的端口
 
 // 中间件 - 增加请求体大小限制
 app.use(bodyParser.json({ limit: '50mb' }));  // 将默认限制增加到 50MB

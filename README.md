@@ -87,7 +87,7 @@ npm start
 
 5. 访问应用
 
-打开浏览器，访问 http://localhost:3000
+打开浏览器，访问 http://localhost:85
 
 ## 使用指南
 

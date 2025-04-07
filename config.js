@@ -7,6 +7,12 @@ const dbConfig = {
   database: 'toubiao'
 };
 
+// 服务器配置
+const serverConfig = {
+  port: 85
+};
+
 module.exports = {
-  dbConfig
+  dbConfig,
+  serverConfig
 }; 
